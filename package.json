@@ -1,0 +1,19 @@
+{
+  "name": "sortable-solution",
+  "version": "1.0.0",
+  "main": "./lib/solution",
+  "scripts": {
+    "start": "node ./lib/solution.js",
+    "test": "./node_modules/standard/bin/cmd.js src",
+    "build": "./node_modules/babel-cli/bin/babel.js src --presets babel-preset-es2015 --out-dir lib"
+  },
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.13.2",
+    "standard": "^8.0.0-beta.5"
+  },
+  "dependencies": {
+    "promisify-node": "^0.4.0"
+  }
+}
