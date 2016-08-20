@@ -31,8 +31,9 @@ export default class Products {
 
   addListing (listing, keywords) {
     keywords.forEach((keyword) => {
-      if (this.indexes["model"][keyword]) {
-        this._addListing(this.indexes["model"][keyword], listing)
+      let prod = this.indexes["model"][keyword]
+      if (this.indexes["model"][keyword] && this._sameManufacter(prod, listing)) {
+        this._addListing(prod, listing)
       }
     })
   }
@@ -41,6 +42,12 @@ export default class Products {
     return this.products.map(cb)
   }
 
+  _sameManufacter (product, listing) {
+    let prodManufacter = product.manufacturer
+    let listManufacter = listing.manufacturer.replace("Canada", "").trim()
+
+    return prodManufacter == listManufacter
+  }
   _addListing (product, listing) { 
     if (!product.listings) product.listings = []
     product.listings.push(listing)
