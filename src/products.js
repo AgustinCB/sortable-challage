@@ -41,7 +41,8 @@ export default class Products {
     let modelProd = this._searchMatches(listing.title, "model", listing)
     let manufacturerProd = this._searchMatches(listing.manufacturer, "manufacturer", listing, true)
 
-    let prod = this._pickBest(_intersectOrFirst(modelProd, manufacturerProd), this._getKeywords(listing.title))
+    let prod = this._pickBest(_intersectOrFirst(modelProd, manufacturerProd), 
+      this._getKeywords(listing.title))
     if (prod) this._addListing(prod, listing)
   }
 
