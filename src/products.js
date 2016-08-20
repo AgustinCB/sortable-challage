@@ -50,7 +50,7 @@ export default class Products {
       }
     })
 
-    let prod = _intersect(modelProd, manufacturerProd)[0]
+    let prod = this._pickBest(_intersect(modelProd, manufacturerProd), keywords)
     if (prod) this._addListing(prod, listing)
   }
 
@@ -58,6 +58,13 @@ export default class Products {
     return this.products.map(cb)
   }
 
+  _pickBest(prods, keywords) {
+    if (!prods.length) return undefined
+    if (prods.length == 1) return prods[0]
+
+    let finalProd = prods.find((prod) => keywords.indexOf(prod.family) > -1)
+    return finalProd ? finalProd : prods[0]
+  }
   _addListing (product, listing) { 
     if (!product.listings) product.listings = []
     product.listings.push(listing)
