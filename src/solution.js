@@ -7,7 +7,10 @@ import Listings from './listings'
 
 let fs = promisify("fs")
 
-const getKeywords = (list) => list.reduce((prev, attr) => prev.concat(attr.split(" ")), [])
+const getKeywords = 
+  (list) => 
+    list.reduce((prev, attr) => 
+      prev.concat(attr.split(" ")), []).map((keyword) => keyword.toLowerCase())
 const createResult = (product) => ({
   product_name: product.product_name,
   listings: product.listings
