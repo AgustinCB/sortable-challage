@@ -67,9 +67,11 @@ export default class Products {
     } else {
       keywords.forEach((keyword, i) => {
         Object.keys(this.indexes[index]).forEach((subIndex) => {
-          if (subIndex.indexOf(keyword) > -1) {
-            prods = prods.concat(this.indexes[index][subIndex])
-          }
+          this._makePhrases(keywords, i).forEach((keyword) => {
+            if (subIndex.indexOf(keyword) > -1) {
+              prods = prods.concat(this.indexes[index][subIndex])
+            }
+	  })
         })
       })
     }
