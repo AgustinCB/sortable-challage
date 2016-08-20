@@ -7,10 +7,6 @@ import Listings from './listings'
 
 let fs = promisify("fs")
 
-const getKeywords = 
-  (list) => 
-    list.reduce((prev, attr) => 
-      prev.concat(attr.split(" ")), []).map((keyword) => keyword.toLowerCase())
 const createResult = (product) => ({
   product_name: product.product_name,
   listings: product.listings
@@ -23,7 +19,7 @@ const main = () => {
   return Promise.all([products.ready(), listings.ready()])
   .then(() => {
     for (let listing of listings.listings) {
-      products.addListing(listing, getKeywords([ listing.manufacturer, listing.title ]))
+      products.addListing(listing)
     }
 
     fs.writeFile(path.join(__dirname, '../data/results.txt'),

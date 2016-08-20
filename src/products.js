@@ -10,7 +10,7 @@ const PRODUCT_INDEXES = Object.freeze([
   "manufacturer"
 ]);
 
-const _intersect = (a, b) => {
+const _intersectOrFirst = (a, b) => {
   var setA = new Set(a)
   var setB = new Set(b)
   var intersection = new Set([...setA].filter(x => setB.has(x)))
@@ -37,20 +37,11 @@ export default class Products {
 
   ready () { return this.readyProm }
 
-  addListing (listing, keywords) {
-    let modelProd = []
-    let manufacturerProd = []
+  addListing (listing) {
+    let modelProd = this._searchMatches(listing.title, "model", listing)
+    let manufacturerProd = this._searchMatches(listing.manufacturer, "manufacturer", listing, true)
 
-    keywords.forEach((keyword) => {
-      if (this.indexes["model"][keyword]) {
-        modelProd = modelProd.concat(this.indexes["model"][keyword])
-      }
-      if (this.indexes["manufacturer"][keyword]) {
-        manufacturerProd = manufacturerProd.concat(this.indexes["manufacturer"][keyword])
-      }
-    })
-
-    let prod = this._pickBest(_intersect(modelProd, manufacturerProd), keywords)
+    let prod = this._pickBest(_intersectOrFirst(modelProd, manufacturerProd), this._getKeywords(listing.title))
     if (prod) this._addListing(prod, listing)
   }
 
@@ -58,21 +49,58 @@ export default class Products {
     return this.products.map(cb)
   }
 
+  _searchMatches(content, index, listing, partial = false) {
+    let prods = []
+    let keywords = this._getKeywords(content)
+
+    if (!partial) {
+      keywords.forEach((keyword, i) => {
+        let found = false
+        this._makePhrases(keywords, i).forEach((keyword) => {
+          if (!found && !partial && this.indexes[index][keyword]) {
+            prods = prods.concat(this.indexes[index][keyword])
+            found = true
+          }
+        })
+      })
+    } else {
+      keywords.forEach((keyword, i) => {
+        Object.keys(this.indexes[index]).forEach((subIndex) => {
+          if (subIndex.indexOf(keyword) > -1) {
+            prods = prods.concat(this.indexes[index][subIndex])
+          }
+        })
+      })
+    }
+
+    return prods
+  }
+
+  _getKeywords (content) { return content.split(" ").map((keyword) => keyword.toLowerCase())  }
+
+  _makePhrases(keywords, i) {
+    const makePhrase = (limit) => keywords.slice(i, limit).join(" ")
+    return [ keywords[i], makePhrase(i+2), makePhrase(i+3) ].reverse()
+  }
+
   _pickBest(prods, keywords) {
     if (!prods.length) return undefined
     if (prods.length == 1) return prods[0]
 
-    let finalProd = prods.find((prod) => keywords.indexOf(prod.family) > -1)
+    let finalProd = prods.find((prod) => prod.family && keywords.indexOf(prod.family.toLowerCase()) > -1)
     return finalProd ? finalProd : prods[0]
   }
+  
   _addListing (product, listing) { 
     if (!product.listings) product.listings = []
     product.listings.push(listing)
   }
+  
   _indexProduct (index, product) {
     let subIndex = product[index].toLowerCase()
     if (!this.indexes[index][subIndex]) this.indexes[index][subIndex] = []
     this.indexes[index][subIndex].push(product)
   }
+
   _createIndex (index) { this.indexes[index] = {} }
 };
