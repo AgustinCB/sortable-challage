@@ -6,7 +6,8 @@ import path from 'path'
 let fs;
 
 const PRODUCT_INDEXES = Object.freeze([
-  "model"
+  "model",
+  "manufacturer"
 ]);
 
 export default class Products {
@@ -30,28 +31,39 @@ export default class Products {
   ready () { return this.readyProm }
 
   addListing (listing, keywords) {
+    let modelProd = []
+    let manufacturerProd = []
+
     keywords.forEach((keyword) => {
-      let prod = this.indexes["model"][keyword]
-      if (this.indexes["model"][keyword] && this._sameManufacter(prod, listing)) {
-        this._addListing(prod, listing)
+      if (this.indexes["model"][keyword]) {
+        modelProd = modelProd.concat(this.indexes["model"][keyword])
+      }
+      if (this.indexes["manufacturer"][keyword]) {
+        manufacturerProd = manufacturerProd.concat(this.indexes["manufacturer"][keyword])
       }
     })
+
+    let prod = this._intersect(modelProd, manufacturerProd)[0]
+    if (prod) this._addListing(prod, listing)
   }
 
   map (cb) {
     return this.products.map(cb)
   }
 
-  _sameManufacter (product, listing) {
-    let prodManufacter = product.manufacturer
-    let listManufacter = listing.manufacturer.replace("Canada", "").trim()
-
-    return prodManufacter == listManufacter
+  _intersect (a, b) {
+    var setA = new Set(a);
+    var setB = new Set(b);
+    var intersection = new Set([...setA].filter(x => setB.has(x)));
+    return Array.from(intersection);
   }
   _addListing (product, listing) { 
     if (!product.listings) product.listings = []
     product.listings.push(listing)
   }
-  _indexProduct (index, product) { this.indexes[index][product[index]] = product }
+  _indexProduct (index, product) {
+    if (!this.indexes[index][product[index]]) this.indexes[index][product[index]] = []
+    this.indexes[index][product[index]].push(product)
+  }
   _createIndex (index) { this.indexes[index] = {} }
 };
